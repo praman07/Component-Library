@@ -22,30 +22,30 @@
       "role": "customer",
       "tier": "premium",
       "createdAt": "2026-01-03T00:00:00.000Z",
-      "updatedAt": "2026-09-28T17:29:36.462Z"
+      "updatedAt": "2026-09-28T18:42:05.374Z"
     }
   ],
   "userCredentials": {
-    "usr_admin_01": "$2b$10$UqYLZIGisNBs0e01Tfj30OUoHn1hrWKvw.VNDZtV/2cacAITQcjcS",
+    "usr_admin_01": "$2b$10$DAqVDXaF9zFbOciYthFm.ejh066odFZx4gfDryf4VsR1.dxJEMJ3u",
     "usr_free_02": "free123",
     "usr_premium_03": "premium123"
   },
   "sessions": [
     {
-      "token": "ti_sess_f2a8132b9c857dd28d77500bd77b596942102c3502f4988f",
+      "token": "ti_sess_5a278d08edc3b8c1f3baa8961e530d61132f383283b1321e",
       "userId": "usr_admin_01",
       "email": "admin@techinject.dev",
       "role": "admin",
       "tier": "premium",
-      "expiresAt": "2026-10-05T17:29:36.361Z"
+      "expiresAt": "2026-10-05T18:42:05.311Z"
     },
     {
-      "token": "ti_sess_9cabc95f49afedb7fce25ad09f0f51ff1158ae8d906f241e",
+      "token": "ti_sess_cab0208f1c27f53a85a1bc8f330724c087040672e6fa38ae",
       "userId": "usr_premium_03",
       "email": "pro@techinject.dev",
       "role": "customer",
       "tier": "premium",
-      "expiresAt": "2026-10-05T17:29:36.460Z"
+      "expiresAt": "2026-10-05T18:42:05.372Z"
     }
   ],
   "components": [
@@ -156,7 +156,7 @@
         "primitive"
       ],
       "createdAt": "2026-03-01T00:00:00.000Z",
-      "updatedAt": "2026-09-28T17:29:36.451Z",
+      "updatedAt": "2026-09-28T18:42:05.368Z",
       "publishedAt": "2026-03-01T00:00:00.000Z"
     },
     {
@@ -696,10 +696,10 @@
         "banner",
         "feedback"
       ],
-      "id": "cmp_0d3f27a09dce",
-      "createdAt": "2026-09-28T17:29:36.453Z",
-      "updatedAt": "2026-09-28T17:29:36.457Z",
-      "publishedAt": "2026-09-28T17:29:36.457Z"
+      "id": "cmp_aaa205c2065c",
+      "createdAt": "2026-09-28T18:42:05.370Z",
+      "updatedAt": "2026-09-28T18:42:05.371Z",
+      "publishedAt": "2026-09-28T18:42:05.371Z"
     }
   ]
 }

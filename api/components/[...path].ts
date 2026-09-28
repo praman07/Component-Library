@@ -5,7 +5,7 @@ import {
   parseAuth,
   generateAiAgentPrompt,
 } from '../serverlessStore';
-import { ComponentSummary } from '../../src/packages/types';
+import { ComponentSummary } from '../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
