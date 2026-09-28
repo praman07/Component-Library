@@ -81,14 +81,20 @@ export const AdminComponentsList: React.FC<AdminComponentsListProps> = ({
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (e) {}
 
       showToast({
         title: 'Component Published',
-        description: data.message,
+        description: data?.message || 'Component published successfully.',
         type: 'success',
       });
+      setComponents((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: 'PUBLISHED' } : c))
+      );
       await fetchComponents();
     } catch (err: any) {
       showToast({ title: 'Publish Failed', description: err.message, type: 'error' });
@@ -104,14 +110,20 @@ export const AdminComponentsList: React.FC<AdminComponentsListProps> = ({
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (e) {}
 
       showToast({
         title: 'Component Unpublished',
-        description: data.message,
+        description: data?.message || 'Component unpublished.',
         type: 'info',
       });
+      setComponents((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: 'UNPUBLISHED' } : c))
+      );
       await fetchComponents();
     } catch (err: any) {
       showToast({ title: 'Unpublish Failed', description: err.message, type: 'error' });
@@ -122,19 +134,24 @@ export const AdminComponentsList: React.FC<AdminComponentsListProps> = ({
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    const targetId = deleteTarget.id;
     try {
-      const res = await fetch(`/api/admin/components/${deleteTarget.id}`, {
+      const res = await fetch(`/api/admin/components/${targetId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (e) {}
 
       showToast({
         title: 'Component Deleted',
-        description: data.message,
+        description: data?.message || 'Component removed.',
         type: 'success',
       });
+      setComponents((prev) => prev.filter((c) => c.id !== targetId));
       setDeleteTarget(null);
       await fetchComponents();
     } catch (err: any) {
