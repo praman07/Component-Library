@@ -694,7 +694,10 @@ class Database {
     if (fs.existsSync(DB_FILE)) {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.components) && parsed.components.length > 0) {
+          return parsed;
+        }
       } catch (err) {
         console.error('Error reading database file, reinitializing seeds:', err);
       }

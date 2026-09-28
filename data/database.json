@@ -22,38 +22,30 @@
       "role": "customer",
       "tier": "premium",
       "createdAt": "2026-01-03T00:00:00.000Z",
-      "updatedAt": "2026-09-28T13:43:35.951Z"
+      "updatedAt": "2026-09-28T15:07:52.346Z"
     }
   ],
   "userCredentials": {
-    "usr_admin_01": "$2b$10$KdubzTHV0KRlHpqb/UVs0eSevymAnMzsCsJGxRdDAXkK.TzmcrA1S",
+    "usr_admin_01": "$2b$10$9a88rtn9Mu2vqgU7SkUjU.I3L5zZgLfrubXd7SKz6xfQY.PcEYJfi",
     "usr_free_02": "free123",
-    "usr_premium_03": "$2b$10$stILN1fk6zb0kLaZhkDp0eK0m9xcPO5z1MXPn8FGAhseWMJfdl12e"
+    "usr_premium_03": "premium123"
   },
   "sessions": [
     {
-      "token": "ti_sess_adcebff6b58946c2edb67a1f29c808a10fc53aad6d42e7a8",
+      "token": "ti_sess_37267c2b858bf50f49748a278d047dfadc554edf5a1c0c5c",
       "userId": "usr_admin_01",
       "email": "admin@techinject.dev",
       "role": "admin",
       "tier": "premium",
-      "expiresAt": "2026-10-05T13:43:35.859Z"
+      "expiresAt": "2026-10-05T15:07:52.284Z"
     },
     {
-      "token": "ti_sess_48f5588fc71d0f5ad73640c98af9463e8d30564da46f1522",
+      "token": "ti_sess_438930226c7e52040dc3e02c1a1b16766599f23edf4c6f2b",
       "userId": "usr_premium_03",
       "email": "pro@techinject.dev",
       "role": "customer",
       "tier": "premium",
-      "expiresAt": "2026-10-05T13:43:35.948Z"
-    },
-    {
-      "token": "ti_sess_0b8d60443df021a5bea0d613cd9f51bac457a55a15247567",
-      "userId": "usr_admin_01",
-      "email": "admin@techinject.dev",
-      "role": "admin",
-      "tier": "premium",
-      "expiresAt": "2026-10-05T14:30:03.170Z"
+      "expiresAt": "2026-10-05T15:07:52.344Z"
     }
   ],
   "components": [
@@ -164,7 +156,7 @@
         "primitive"
       ],
       "createdAt": "2026-03-01T00:00:00.000Z",
-      "updatedAt": "2026-09-28T13:43:35.940Z",
+      "updatedAt": "2026-09-28T15:07:52.340Z",
       "publishedAt": "2026-03-01T00:00:00.000Z"
     },
     {
@@ -263,7 +255,7 @@
       "category": "primitives",
       "version": "1.1.0",
       "accessLevel": "FREE",
-      "status": "UNPUBLISHED",
+      "status": "PUBLISHED",
       "dependencies": {},
       "propsSchema": [
         {
@@ -334,7 +326,7 @@
         "primitive"
       ],
       "createdAt": "2026-03-03T00:00:00.000Z",
-      "updatedAt": "2026-09-28T14:31:09.456Z",
+      "updatedAt": "2026-03-03T00:00:00.000Z",
       "publishedAt": "2026-03-03T00:00:00.000Z"
     },
     {
@@ -652,7 +644,7 @@
       "category": "navigation",
       "version": "0.1.0-draft",
       "accessLevel": "PREMIUM",
-      "status": "PUBLISHED",
+      "status": "DRAFT",
       "dependencies": {},
       "propsSchema": [],
       "mainFile": "src/components/ui/CommandPalette.tsx",
@@ -678,8 +670,8 @@
         "wip"
       ],
       "createdAt": "2026-03-09T00:00:00.000Z",
-      "updatedAt": "2026-09-28T14:31:04.598Z",
-      "publishedAt": "2026-09-28T14:31:04.598Z"
+      "updatedAt": "2026-03-09T00:00:00.000Z",
+      "publishedAt": null
     },
     {
       "name": "Notification Banner",
@@ -704,10 +696,10 @@
         "banner",
         "feedback"
       ],
-      "id": "cmp_5b45be1f415f",
-      "createdAt": "2026-09-28T13:43:35.942Z",
-      "updatedAt": "2026-09-28T13:43:35.946Z",
-      "publishedAt": "2026-09-28T13:43:35.946Z"
+      "id": "cmp_70da3d69e67a",
+      "createdAt": "2026-09-28T15:07:52.342Z",
+      "updatedAt": "2026-09-28T15:07:52.343Z",
+      "publishedAt": "2026-09-28T15:07:52.343Z"
     }
   ]
 }

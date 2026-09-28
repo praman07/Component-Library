@@ -84,22 +84,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ];
         }
         const mongoComps = await ComponentModel.find(query).lean();
-        const summaries: ComponentSummary[] = mongoComps.map((c: any) => ({
-          id: c.componentId || c._id.toString(),
-          name: c.name,
-          slug: c.slug,
-          description: c.description,
-          category: c.category,
-          version: c.version,
-          accessLevel: c.accessLevel,
-          status: c.status,
-          tags: c.tags || [],
-          dependenciesCount: c.dependencies ? (c.dependencies instanceof Map ? c.dependencies.size : Object.keys(c.dependencies).length) : 0,
-          filesCount: c.files ? c.files.length : 0,
-          publishedAt: c.publishedAt ? new Date(c.publishedAt).toISOString() : null,
-          updatedAt: c.updatedAt ? new Date(c.updatedAt).toISOString() : new Date().toISOString(),
-        }));
-        return res.status(200).json({ components: summaries });
+        if (mongoComps && mongoComps.length > 0) {
+          const summaries: ComponentSummary[] = mongoComps.map((c: any) => ({
+            id: c.componentId || c._id.toString(),
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            category: c.category,
+            version: c.version,
+            accessLevel: c.accessLevel,
+            status: c.status,
+            tags: c.tags || [],
+            dependenciesCount: c.dependencies ? (c.dependencies instanceof Map ? c.dependencies.size : Object.keys(c.dependencies).length) : 0,
+            filesCount: c.files ? c.files.length : 0,
+            publishedAt: c.publishedAt ? new Date(c.publishedAt).toISOString() : null,
+            updatedAt: c.updatedAt ? new Date(c.updatedAt).toISOString() : new Date().toISOString(),
+          }));
+          return res.status(200).json({ components: summaries });
+        }
       }
 
       const components = db.listComponents({
