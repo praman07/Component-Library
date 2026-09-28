@@ -14,6 +14,7 @@ import { AdminComponentsList } from './apps/admin/AdminComponentsList';
 import { AdminComponentEditor } from './apps/admin/AdminComponentEditor';
 import { AdminCustomers } from './apps/admin/AdminCustomers';
 import { ComponentSummary } from './packages/types';
+import { HARDCODED_COMPONENTS } from '../server/hardcodedData';
 
 function AppContent() {
   const { user, loading: authLoading } = useAuth();
@@ -41,12 +42,52 @@ function AppContent() {
   const loadCatalogue = async () => {
     try {
       const res = await fetch('/api/components');
-      if (res.ok) {
-        const data = await res.json();
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.warn('Non-JSON response from /api/components:', text);
+      }
+
+      if (res.ok && data && Array.isArray(data.components) && data.components.length > 0) {
         setComponents(data.components);
+      } else if (HARDCODED_COMPONENTS && HARDCODED_COMPONENTS.length > 0) {
+        const fallbacks: ComponentSummary[] = HARDCODED_COMPONENTS.filter((c) => c.status === 'PUBLISHED').map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          description: c.description,
+          category: c.category,
+          version: c.version,
+          accessLevel: c.accessLevel,
+          status: c.status,
+          tags: c.tags,
+          dependenciesCount: Object.keys(c.dependencies).length,
+          filesCount: c.files.length,
+          publishedAt: c.publishedAt,
+          updatedAt: c.updatedAt,
+        }));
+        setComponents(fallbacks);
       }
     } catch (err) {
       console.error('Failed to load catalogue components:', err);
+      const fallbacks: ComponentSummary[] = HARDCODED_COMPONENTS.filter((c) => c.status === 'PUBLISHED').map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.description,
+        category: c.category,
+        version: c.version,
+        accessLevel: c.accessLevel,
+        status: c.status,
+        tags: c.tags,
+        dependenciesCount: Object.keys(c.dependencies).length,
+        filesCount: c.files.length,
+        publishedAt: c.publishedAt,
+        updatedAt: c.updatedAt,
+      }));
+      setComponents(fallbacks);
     } finally {
       setLoadingComponents(false);
     }

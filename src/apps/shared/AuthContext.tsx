@@ -27,8 +27,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers['Authorization'] = `Bearer ${activeToken}`;
       }
       const res = await fetch('/api/auth/me', { headers });
-      if (res.ok) {
-        const data = await res.json();
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.warn('Non-JSON response from /api/auth/me:', text);
+      }
+
+      if (res.ok && data) {
         setUser(data.user);
         if (!data.user && activeToken) {
           localStorage.removeItem('ti_auth_token');
@@ -53,9 +60,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password: pass }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        console.warn('Non-JSON response from /api/auth/login:', text);
+        return { success: false, error: 'Server temporarily unavailable. Please try again.' };
+      }
+
       if (!res.ok) {
-        return { success: false, error: data.error || 'Authentication failed' };
+        return { success: false, error: data?.error || 'Authentication failed' };
       }
 
       setToken(data.token);

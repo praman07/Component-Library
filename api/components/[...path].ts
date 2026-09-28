@@ -3,6 +3,7 @@ import { db } from '../../server/db';
 import { extractAuthUser, AuthenticatedRequest } from '../../server/auth';
 import { connectMongo, isMongoActive } from '../../server/mongodb';
 import { ComponentModel } from '../../server/models';
+import { HARDCODED_COMPONENTS } from '../../server/hardcodedData';
 import { generateAiAgentPrompt } from '../../server/generator';
 import { ComponentSummary, ComponentRecord, AccessLevel } from '../../src/packages/types';
 
@@ -49,7 +50,14 @@ async function getComponentFromStore(slug: string, includeUnpublished = false): 
       };
     }
   }
-  return db.getComponentBySlug(slug, includeUnpublished);
+  const comp = db.getComponentBySlug(slug, includeUnpublished);
+  if (comp) return comp;
+  const hardcoded = HARDCODED_COMPONENTS.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
+  if (hardcoded) {
+    if (!includeUnpublished && hardcoded.status !== 'PUBLISHED') return null;
+    return hardcoded;
+  }
+  return null;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -104,12 +112,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      const components = db.listComponents({
+      let components = db.listComponents({
         category: typeof category === 'string' ? category : undefined,
         accessLevel: typeof accessLevel === 'string' ? (accessLevel as AccessLevel) : undefined,
         search: typeof search === 'string' ? search : undefined,
         includeDrafts: false,
       });
+
+      if (!components || components.length === 0) {
+        components = HARDCODED_COMPONENTS.filter((c) => c.status === 'PUBLISHED');
+        if (category && category !== 'all') {
+          components = components.filter((c) => c.category === category);
+        }
+        if (accessLevel) {
+          components = components.filter((c) => c.accessLevel === accessLevel);
+        }
+        if (search && typeof search === 'string') {
+          const q = search.toLowerCase();
+          components = components.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+        }
+      }
 
       const summaries: ComponentSummary[] = components.map((c) => ({
         id: c.id,

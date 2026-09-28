@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
 import { db } from '../../server/db';
 import { extractAuthUser, AuthenticatedRequest } from '../../server/auth';
+import { HARDCODED_COMPONENTS } from '../../server/hardcodedData';
 
 function runMiddleware(req: any, res: any, fn: any) {
   return new Promise((resolve, reject) => {
@@ -97,12 +98,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (subResource === 'components') {
       if (!id && req.method === 'GET') {
         const { status } = req.query;
-        return res.status(200).json({
-          components: db.listComponents({
-            status: typeof status === 'string' ? (status as any) : undefined,
-            includeDrafts: true,
-          }),
+        let list = db.listComponents({
+          status: typeof status === 'string' ? (status as any) : undefined,
+          includeDrafts: true,
         });
+        if ((!list || list.length === 0) && HARDCODED_COMPONENTS && HARDCODED_COMPONENTS.length > 0) {
+          list = HARDCODED_COMPONENTS as any;
+        }
+        return res.status(200).json({ components: list });
       }
 
       if (!id && req.method === 'POST') {

@@ -15,6 +15,7 @@ import {
 import { renderLiveComponent } from '../../packages/reference-components/registry';
 import { Terminal, Copy, Cpu, ArrowLeft, Layers, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../shared/AuthContext';
+import { HARDCODED_COMPONENTS } from '../../../server/hardcodedData';
 
 export interface ComponentDetailPageProps {
   slug: string;
@@ -42,13 +43,31 @@ export const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({
         headers['Authorization'] = `Bearer ${token}`;
       }
       const res = await fetch(`/api/components/${slug}`, { headers });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to load component');
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.warn('Non-JSON response from /api/components/' + slug, text);
       }
-      setComponent(data.component);
+
+      if (res.ok && data?.component) {
+        setComponent(data.component);
+      } else {
+        const fallback = HARDCODED_COMPONENTS.find((c) => c.slug === slug);
+        if (fallback) {
+          setComponent(fallback as any);
+        } else {
+          throw new Error(data?.error || 'Failed to load component');
+        }
+      }
     } catch (err: any) {
-      setError(err.message);
+      const fallback = HARDCODED_COMPONENTS.find((c) => c.slug === slug);
+      if (fallback) {
+        setComponent(fallback as any);
+      } else {
+        setError(err.message || 'Component not found');
+      }
     } finally {
       setLoading(false);
     }

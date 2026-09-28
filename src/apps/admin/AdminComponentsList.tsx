@@ -12,6 +12,7 @@ import {
 } from '../../packages/ui';
 import { Plus, Edit3, Globe, EyeOff, Trash2, ExternalLink } from 'lucide-react';
 import { useAuth } from '../shared/AuthContext';
+import { HARDCODED_COMPONENTS } from '../../../server/hardcodedData';
 
 export interface AdminComponentsListProps {
   onNavigate: (path: string) => void;
@@ -43,13 +44,27 @@ export const AdminComponentsList: React.FC<AdminComponentsListProps> = ({
       const res = await fetch('/api/admin/components', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
-        throw new Error('Failed to load components');
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.warn('Non-JSON response from /api/admin/components:', text);
       }
-      const data = await res.json();
-      setComponents(data.components);
+
+      if (res.ok && data?.components) {
+        setComponents(data.components);
+      } else if (HARDCODED_COMPONENTS && HARDCODED_COMPONENTS.length > 0) {
+        setComponents(HARDCODED_COMPONENTS as any);
+      } else {
+        throw new Error(data?.error || 'Failed to load components');
+      }
     } catch (err: any) {
-      setError(err.message);
+      if (HARDCODED_COMPONENTS && HARDCODED_COMPONENTS.length > 0) {
+        setComponents(HARDCODED_COMPONENTS as any);
+      } else {
+        setError(err.message || 'Failed to load components');
+      }
     } finally {
       setLoading(false);
     }
