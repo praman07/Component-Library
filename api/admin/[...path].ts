@@ -1,19 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
-import { db } from '../../server/db';
-import { extractAuthUser, AuthenticatedRequest } from '../../server/auth';
-import { HARDCODED_COMPONENTS, HARDCODED_USERS } from '../../server/hardcodedData';
-
-function runMiddleware(req: any, res: any, fn: any) {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result: any) => {
-      if (result instanceof Error) {
-        return reject(result);
-      }
-      return resolve(result);
-    });
-  });
-}
+import {
+  HARDCODED_COMPONENTS,
+  HARDCODED_USERS,
+  parseAuth,
+  getComponentsList,
+  getComponentById,
+  getComponentBySlug,
+  updateComponentStatus,
+  createNewComponent,
+  updateComponentData,
+  deleteComponentById,
+} from '../serverlessStore';
 
 const ComponentBundleSchema = z.object({
   name: z.string().min(2).max(60),
@@ -56,10 +54,9 @@ const ComponentBundleSchema = z.object({
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    await runMiddleware(req, res, extractAuthUser);
-    const authReq = req as unknown as AuthenticatedRequest;
+    const auth = parseAuth(req);
 
-    if (!authReq.user || authReq.user.role !== 'admin') {
+    if (!auth.user || auth.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Administrator privileges required',
         code: 'FORBIDDEN',
@@ -72,34 +69,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // GET /api/admin/stats
     if (subResource === 'stats' && req.method === 'GET') {
-      try {
-        const stats = db.getStats();
-        return res.status(200).json({ stats });
-      } catch (err) {
-        const total = HARDCODED_COMPONENTS.length;
-        const pub = HARDCODED_COMPONENTS.filter((c) => c.status === 'PUBLISHED').length;
-        const prem = HARDCODED_COMPONENTS.filter((c) => c.accessLevel === 'PREMIUM').length;
-        return res.status(200).json({
-          stats: {
-            totalComponents: total,
-            publishedCount: pub,
-            draftCount: total - pub,
-            premiumCount: prem,
-            freeCount: total - prem,
-            customerCount: 2,
-            premiumCustomerCount: 1,
-          },
-        });
-      }
+      const allComps = getComponentsList({ includeDrafts: true });
+      const total = allComps.length;
+      const pub = allComps.filter((c) => c.status === 'PUBLISHED').length;
+      const prem = allComps.filter((c) => c.accessLevel === 'PREMIUM').length;
+      return res.status(200).json({
+        stats: {
+          totalComponents: total,
+          publishedCount: pub,
+          draftCount: total - pub,
+          premiumCount: prem,
+          freeCount: total - prem,
+          customerCount: HARDCODED_USERS.filter((u) => u.role === 'customer').length,
+          premiumCustomerCount: HARDCODED_USERS.filter((u) => u.tier === 'premium').length,
+        },
+      });
     }
 
     // /api/admin/customers
     if (subResource === 'customers') {
       if (req.method === 'GET') {
-        let custs = db.listCustomers();
-        if (!custs || custs.length === 0) {
-          custs = HARDCODED_USERS.filter((u) => u.role === 'customer');
-        }
+        const custs = HARDCODED_USERS.filter((u) => u.role === 'customer');
         return res.status(200).json({ customers: custs });
       }
       if (action === 'tier' && req.method === 'POST') {
@@ -107,10 +97,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (tier !== 'free' && tier !== 'premium') {
           return res.status(400).json({ error: "Invalid tier. Must be 'free' or 'premium'." });
         }
-        const updated = db.setCustomerTier(id, tier);
-        if (!updated) return res.status(404).json({ error: 'Customer not found' });
+        const found = HARDCODED_USERS.find((u) => u.id === id);
+        if (!found) return res.status(404).json({ error: 'Customer not found' });
+        found.tier = tier;
         return res.status(200).json({
-          customer: updated,
+          customer: found,
           message: `Customer tier updated to '${tier}'`,
         });
       }
@@ -120,12 +111,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (subResource === 'components') {
       if (!id && req.method === 'GET') {
         const { status } = req.query;
-        let list = db.listComponents({
-          status: typeof status === 'string' ? (status as any) : undefined,
-          includeDrafts: true,
-        });
-        if ((!list || list.length === 0) && HARDCODED_COMPONENTS && HARDCODED_COMPONENTS.length > 0) {
-          list = HARDCODED_COMPONENTS as any;
+        let list = getComponentsList({ includeDrafts: true });
+        if (status && typeof status === 'string') {
+          list = list.filter((c) => c.status === status);
         }
         return res.status(200).json({ components: list });
       }
@@ -138,31 +126,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             issues: parsed.error.issues,
           });
         }
-        const existing = db.getComponentBySlug(parsed.data.slug, true);
+        const existing = getComponentBySlug(parsed.data.slug, true);
         if (existing) {
           return res.status(409).json({ error: `Component with slug '${parsed.data.slug}' already exists` });
         }
-        const created = db.createComponent(parsed.data);
+        const created = createNewComponent(parsed.data);
         return res.status(201).json({ component: created, message: 'Component created successfully' });
       }
 
       if (id && req.method === 'GET') {
-        let comp: any = db.getComponentById(id);
-        if (!comp) {
-          comp = HARDCODED_COMPONENTS.find((c) => c.id === id || c.slug === id) || null;
-        }
+        const comp = getComponentById(id);
         if (!comp) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ component: comp });
       }
 
       if (id && action === 'publish' && req.method === 'POST') {
-        const updated = db.setComponentStatus(id, 'PUBLISHED');
+        const updated = updateComponentStatus(id, 'PUBLISHED');
         if (!updated) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ component: updated, message: `Component '${updated.name}' published to catalogue.` });
       }
 
       if (id && action === 'unpublish' && req.method === 'POST') {
-        const updated = db.setComponentStatus(id, 'UNPUBLISHED');
+        const updated = updateComponentStatus(id, 'UNPUBLISHED');
         if (!updated) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ component: updated, message: `Component '${updated.name}' unpublished.` });
       }
@@ -172,7 +157,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!['DRAFT', 'PUBLISHED', 'UNPUBLISHED'].includes(status)) {
           return res.status(400).json({ error: 'Invalid status' });
         }
-        const updated = db.setComponentStatus(id, status);
+        const updated = updateComponentStatus(id, status);
         if (!updated) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ component: updated, message: `Status updated to ${status}` });
       }
@@ -182,13 +167,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!parsed.success) {
           return res.status(422).json({ error: 'Validation failed', issues: parsed.error.issues });
         }
-        const updated = db.updateComponent(id, parsed.data);
+        const updated = updateComponentData(id, parsed.data);
         if (!updated) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ component: updated, message: 'Component updated successfully' });
       }
 
       if (id && req.method === 'DELETE') {
-        const deleted = db.deleteComponent(id);
+        const deleted = deleteComponentById(id);
         if (!deleted) return res.status(404).json({ error: 'Component not found' });
         return res.status(200).json({ success: true, message: 'Component deleted' });
       }

@@ -1,21 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { db } from '../../server/db';
-import { extractAuthUser } from '../../server/auth';
-import { connectMongo, isMongoActive } from '../../server/mongodb';
-import { ComponentModel } from '../../server/models';
-import { HARDCODED_COMPONENTS } from '../../server/hardcodedData';
-import { ComponentSummary, AccessLevel } from '../../src/packages/types';
-
-function runMiddleware(req: any, res: any, fn: any) {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result: any) => {
-      if (result instanceof Error) {
-        return reject(result);
-      }
-      return resolve(result);
-    });
-  });
-}
+import { getComponentsList } from '../serverlessStore';
+import { ComponentSummary } from '../../src/packages/types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -23,79 +8,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    try {
-      await runMiddleware(req, res, extractAuthUser);
-    } catch (e) {
-      // Non-fatal
-    }
-
-    try {
-      await connectMongo();
-    } catch (e) {
-      // Non-fatal
-    }
-
     const { category, accessLevel, search } = req.query;
 
-    if (isMongoActive()) {
-      const query: any = { status: 'PUBLISHED' };
-      if (category && category !== 'all') {
-        query.category = category;
-      }
-      if (accessLevel) {
-        query.accessLevel = accessLevel;
-      }
-      if (search && typeof search === 'string') {
-        query.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { slug: { $regex: search, $options: 'i' } },
-          { tags: { $regex: search, $options: 'i' } },
-        ];
-      }
-
-      const mongoComps = await ComponentModel.find(query).lean();
-      if (mongoComps && mongoComps.length > 0) {
-        const summaries: ComponentSummary[] = mongoComps.map((c: any) => ({
-          id: c.componentId || c._id.toString(),
-          name: c.name,
-          slug: c.slug,
-          description: c.description,
-          category: c.category,
-          version: c.version,
-          accessLevel: c.accessLevel,
-          status: c.status,
-          tags: c.tags || [],
-          dependenciesCount: c.dependencies ? (c.dependencies instanceof Map ? c.dependencies.size : Object.keys(c.dependencies).length) : 0,
-          filesCount: c.files ? c.files.length : 0,
-          publishedAt: c.publishedAt ? new Date(c.publishedAt).toISOString() : null,
-          updatedAt: c.updatedAt ? new Date(c.updatedAt).toISOString() : new Date().toISOString(),
-        }));
-
-        return res.status(200).json({ components: summaries });
-      }
-    }
-
-    let components = db.listComponents({
+    const components = getComponentsList({
       category: typeof category === 'string' ? category : undefined,
-      accessLevel: typeof accessLevel === 'string' ? (accessLevel as AccessLevel) : undefined,
+      accessLevel: typeof accessLevel === 'string' ? (accessLevel as any) : undefined,
       search: typeof search === 'string' ? search : undefined,
       includeDrafts: false,
     });
-
-    if (!components || components.length === 0) {
-      components = HARDCODED_COMPONENTS.filter((c) => c.status === 'PUBLISHED');
-      if (category && category !== 'all') {
-        components = components.filter((c) => c.category === category);
-      }
-      if (accessLevel) {
-        components = components.filter((c) => c.accessLevel === accessLevel);
-      }
-      if (search && typeof search === 'string') {
-        const q = search.toLowerCase();
-        components = components.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
-      }
-    }
 
     const summaries: ComponentSummary[] = components.map((c) => ({
       id: c.id,
@@ -107,8 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       accessLevel: c.accessLevel,
       status: c.status,
       tags: c.tags,
-      dependenciesCount: Object.keys(c.dependencies).length,
-      filesCount: c.files.length,
+      dependenciesCount: Object.keys(c.dependencies || {}).length,
+      filesCount: (c.files || []).length,
       publishedAt: c.publishedAt,
       updatedAt: c.updatedAt,
     }));
