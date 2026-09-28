@@ -24,11 +24,15 @@ const DB_FILE = path.resolve(DATA_DIR, 'database.json');
 const BUNDLES_DIR = path.resolve(DATA_DIR, 'bundles');
 
 function ensureDirectories() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(BUNDLES_DIR)) {
-    fs.mkdirSync(BUNDLES_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(BUNDLES_DIR)) {
+      fs.mkdirSync(BUNDLES_DIR, { recursive: true });
+    }
+  } catch (err) {
+    // Non-fatal if filesystem is read-only (e.g. serverless environments)
   }
 }
 
@@ -706,10 +710,14 @@ class Database {
   }
 
   private saveImmediate(dataToSave = this.data) {
-    ensureDirectories();
-    const tempFile = `${DB_FILE}.tmp.${Date.now()}.${Math.random().toString(36).substring(2, 6)}`;
-    fs.writeFileSync(tempFile, JSON.stringify(dataToSave, null, 2), 'utf-8');
-    fs.renameSync(tempFile, DB_FILE);
+    try {
+      ensureDirectories();
+      const tempFile = `${DB_FILE}.tmp.${Date.now()}.${Math.random().toString(36).substring(2, 6)}`;
+      fs.writeFileSync(tempFile, JSON.stringify(dataToSave, null, 2), 'utf-8');
+      fs.renameSync(tempFile, DB_FILE);
+    } catch (err) {
+      // In read-only serverless runtimes (like Vercel lambda), fallback to in-memory state
+    }
   }
 
   public save() {
