@@ -81,22 +81,28 @@ export const AdminComponentEditor: React.FC<AdminComponentEditorProps> = ({
       };
       fetchComp();
     } else {
-      // Default template for new component
+      applyPreset('segmented');
+    }
+  }, [componentId, isNew, token]);
+
+  const applyPreset = (presetKey: 'segmented' | 'switch' | 'alert' | 'stat') => {
+    if (presetKey === 'segmented') {
       setName('SegmentedControl');
       setSlug('segmented-control');
       setDescription('Tactile segmented button controller for managing discrete view options.');
       setCategory('navigation');
       setVersion('1.0.0');
       setAccessLevel('FREE');
-      setStatus('DRAFT');
+      setStatus('PUBLISHED');
       setDependenciesStr(JSON.stringify({ 'lucide-react': '^0.546.0' }, null, 2));
-      setUsageDocs(`<SegmentedControl options={['Day', 'Week', 'Month']} value="Day" />`);
+      setUsageDocs(`import { SegmentedControl } from '@/components/ui/SegmentedControl';\n\nexport function Demo() {\n  return <SegmentedControl options={['Day', 'Week', 'Month']} value="Day" onChange={console.log} />;\n}`);
       setMainFile('src/components/ui/SegmentedControl.tsx');
       setPropsSchemaStr(
         JSON.stringify(
           [
             { name: 'options', type: 'string[]', required: true, description: 'Available segments' },
             { name: 'value', type: 'string', required: true, description: 'Selected segment value' },
+            { name: 'onChange', type: '(value: string) => void', required: false, description: 'Change callback' },
           ],
           null,
           2
@@ -107,8 +113,78 @@ export const AdminComponentEditor: React.FC<AdminComponentEditorProps> = ({
           [
             {
               path: 'src/components/ui/SegmentedControl.tsx',
-              content: `import React from 'react';\n\nexport const SegmentedControl = () => <div>Segmented Control Implementation</div>;`,
-              description: 'Main component',
+              content: `import React from 'react';\n\nexport interface SegmentedControlProps {\n  options: string[];\n  value: string;\n  onChange?: (val: string) => void;\n}\n\nexport const SegmentedControl: React.FC<SegmentedControlProps> = ({\n  options,\n  value,\n  onChange,\n}) => {\n  return (\n    <div className="inline-flex p-1 bg-[#111111] border border-[#262626] rounded-md gap-1">\n      {options.map((opt) => (\n        <button\n          key={opt}\n          onClick={() => onChange?.(opt)}\n          className={\`px-3 py-1 text-xs rounded transition-colors \${\n            value === opt ? 'bg-[#FFFFFF] text-[#000000] font-semibold' : 'text-[#8A8A8A] hover:text-[#FFFFFF]'\n          }\`}\n        >\n          {opt}\n        </button>\n      ))}\n    </div>\n  );\n};`,
+              description: 'SegmentedControl component implementation',
+            },
+          ],
+          null,
+          2
+        )
+      );
+    } else if (presetKey === 'switch') {
+      setName('ToggleSwitch');
+      setSlug('toggle-switch');
+      setDescription('Monochrome binary switch trigger with tactile keyboard accessibility and state indicators.');
+      setCategory('forms');
+      setVersion('1.0.0');
+      setAccessLevel('FREE');
+      setStatus('PUBLISHED');
+      setDependenciesStr(JSON.stringify({}, null, 2));
+      setUsageDocs(`import { ToggleSwitch } from '@/components/ui/ToggleSwitch';\n\nexport function Demo() {\n  const [checked, setChecked] = useState(false);\n  return <ToggleSwitch checked={checked} onChange={setChecked} label="Enable telemetry" />;\n}`);
+      setMainFile('src/components/ui/ToggleSwitch.tsx');
+      setPropsSchemaStr(
+        JSON.stringify(
+          [
+            { name: 'checked', type: 'boolean', required: true, description: 'Binary checked state' },
+            { name: 'onChange', type: '(checked: boolean) => void', required: true, description: 'Toggle callback' },
+            { name: 'label', type: 'string', required: false, description: 'Optional helper label' },
+          ],
+          null,
+          2
+        )
+      );
+      setFilesStr(
+        JSON.stringify(
+          [
+            {
+              path: 'src/components/ui/ToggleSwitch.tsx',
+              content: `import React from 'react';\n\nexport interface ToggleSwitchProps {\n  checked: boolean;\n  onChange: (checked: boolean) => void;\n  label?: string;\n}\n\nexport const ToggleSwitch: React.FC<ToggleSwitchProps> = ({\n  checked,\n  onChange,\n  label,\n}) => (\n  <label className="inline-flex items-center gap-2.5 cursor-pointer select-none text-xs text-[#F5F5F5]">\n    <button\n      type="button"\n      role="switch"\n      aria-checked={checked}\n      onClick={() => onChange(!checked)}\n      className={\`w-9 h-5 rounded-full p-0.5 transition-colors border \${\n        checked ? 'bg-[#FFFFFF] border-[#FFFFFF]' : 'bg-[#161616] border-[#2E2E2E]'\n      }\`}\n    >\n      <div\n        className={\`w-3.5 h-3.5 rounded-full transition-transform \${\n          checked ? 'translate-x-4 bg-[#000000]' : 'translate-x-0 bg-[#737373]'\n        }\`}\n      />\n    </button>\n    {label && <span>{label}</span>}\n  </label>\n);`,
+              description: 'Accessible monochrome switch component',
+            },
+          ],
+          null,
+          2
+        )
+      );
+    } else if (presetKey === 'alert') {
+      setName('AlertBanner');
+      setSlug('alert-banner');
+      setDescription('Tactile notification banner supporting default, warning, and critical notification states.');
+      setCategory('feedback');
+      setVersion('1.0.0');
+      setAccessLevel('PREMIUM');
+      setStatus('PUBLISHED');
+      setDependenciesStr(JSON.stringify({ 'lucide-react': '^0.546.0' }, null, 2));
+      setUsageDocs(`import { AlertBanner } from '@/components/ui/AlertBanner';\n\nexport function Demo() {\n  return <AlertBanner title="Cluster Synchronized" description="All nodes healthy." />;\n}`);
+      setMainFile('src/components/ui/AlertBanner.tsx');
+      setPropsSchemaStr(
+        JSON.stringify(
+          [
+            { name: 'title', type: 'string', required: true, description: 'Banner title' },
+            { name: 'description', type: 'string', required: false, description: 'Detail description' },
+            { name: 'variant', type: "'default' | 'critical'", required: false, default: "'default'", description: 'Visual emphasis' },
+          ],
+          null,
+          2
+        )
+      );
+      setFilesStr(
+        JSON.stringify(
+          [
+            {
+              path: 'src/components/ui/AlertBanner.tsx',
+              content: `import React from 'react';\nimport { AlertCircle } from 'lucide-react';\n\nexport interface AlertBannerProps {\n  title: string;\n  description?: string;\n  variant?: 'default' | 'critical';\n}\n\nexport const AlertBanner: React.FC<AlertBannerProps> = ({ title, description, variant = 'default' }) => (\n  <div className={\`p-3.5 rounded-md border text-xs flex gap-3 \${\n    variant === 'critical' ? 'bg-[#1C1111] border-[#442222] text-[#F5F5F5]' : 'bg-[#111111] border-[#262626] text-[#F5F5F5]'\n  }\`}>\n    <AlertCircle className="w-4 h-4 text-[#A3A3A3] shrink-0 mt-0.5" />\n    <div>\n      <div className="font-semibold text-[#FFFFFF]">{title}</div>\n      {description && <div className="text-[11px] text-[#8A8A8A] mt-0.5">{description}</div>}\n    </div>\n  </div>\n);`,
+              description: 'Alert banner component',
             },
           ],
           null,
@@ -116,7 +192,7 @@ export const AdminComponentEditor: React.FC<AdminComponentEditorProps> = ({
         )
       );
     }
-  }, [componentId, isNew, token]);
+  };
 
   const handleSave = async (publishImmediate = false) => {
     setSaving(true);
@@ -247,6 +323,38 @@ export const AdminComponentEditor: React.FC<AdminComponentEditorProps> = ({
           </Button>
         </div>
       </div>
+
+      {isNew && (
+        <div className="p-3.5 rounded-md border border-[#262626] bg-[#111111] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="text-xs">
+            <span className="font-semibold text-[#FFFFFF]">Load Starter Preset Template:</span>
+            <p className="text-[11px] text-[#737373]">Pre-populates working TSX code, schema, and dependencies</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => applyPreset('segmented')}
+              className="px-2.5 py-1 text-xs rounded bg-[#161616] hover:bg-[#222222] border border-[#2B2B2B] text-[#F5F5F5] cursor-pointer"
+            >
+              Segmented Control
+            </button>
+            <button
+              type="button"
+              onClick={() => applyPreset('switch')}
+              className="px-2.5 py-1 text-xs rounded bg-[#161616] hover:bg-[#222222] border border-[#2B2B2B] text-[#F5F5F5] cursor-pointer"
+            >
+              Toggle Switch
+            </button>
+            <button
+              type="button"
+              onClick={() => applyPreset('alert')}
+              className="px-2.5 py-1 text-xs rounded bg-[#161616] hover:bg-[#222222] border border-[#2B2B2B] text-[#F5F5F5] cursor-pointer"
+            >
+              Alert Banner (Premium)
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Editor Tabs */}
       <Tabs

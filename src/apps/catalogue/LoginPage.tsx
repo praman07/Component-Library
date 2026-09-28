@@ -25,8 +25,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onNavigate }) =
     setError(null);
     const result = await login(email, password);
     setLoading(false);
-    if (result.success) {
-      onSuccess();
+    if (result.success && result.user) {
+      if (result.user.role === 'admin') {
+        onNavigate('/admin');
+      } else {
+        onNavigate('/account');
+      }
     } else {
       setError(result.error || 'Authentication failed');
     }
@@ -39,8 +43,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onNavigate }) =
     setError(null);
     const result = await login(eEmail, ePass);
     setLoading(false);
-    if (result.success) {
-      onSuccess();
+    if (result.success && result.user) {
+      if (result.user.role === 'admin') {
+        onNavigate('/admin');
+      } else {
+        onNavigate('/account');
+      }
     } else {
       setError(result.error || 'Quick login failed');
     }

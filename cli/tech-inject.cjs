@@ -20,7 +20,7 @@ function parseArgs() {
   const slug = positional[1];
 
   let targetDir = process.cwd();
-  let serverUrl = process.env.TECH_INJECT_URL || 'http://localhost:3000';
+  let serverUrl = process.env.TECH_INJECT_API_URL || process.env.TECH_INJECT_URL || process.env.APP_URL || 'http://localhost:3000';
   let token = process.env.TECH_INJECT_TOKEN || '';
   let overwrite = args.includes('--overwrite') || args.includes('-f');
 

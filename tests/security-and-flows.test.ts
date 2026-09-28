@@ -25,6 +25,59 @@ async function runTests() {
   // Reset database to ensure clean state
   db.resetToSeeds();
 
+  // Test 0a: Login works and verifies credentials using bcrypt/secure password check
+  test('0a. Login works with correct credentials', () => {
+    const admin = db.verifyCredentials('admin@techinject.dev', 'admin123');
+    assert.ok(admin);
+    assert.strictEqual(admin.email, 'admin@techinject.dev');
+    assert.strictEqual(admin.role, 'admin');
+
+    const session = db.createSession(admin);
+    assert.ok(session.token.startsWith('ti_sess_'));
+    const verified = db.verifySessionUser(session.token);
+    assert.ok(verified);
+    assert.strictEqual(verified.email, 'admin@techinject.dev');
+  });
+
+  // Test 0b: Invalid login fails
+  test('0b. Invalid login fails with incorrect password or unknown email', () => {
+    const badPass = db.verifyCredentials('admin@techinject.dev', 'wrongpassword');
+    assert.strictEqual(badPass, null);
+
+    const unknownUser = db.verifyCredentials('unknown@nowhere.com', 'admin123');
+    assert.strictEqual(unknownUser, null);
+  });
+
+  // Test 0c: Logout invalidates session
+  test('0c. Logout invalidates session immediately', () => {
+    const user = db.getUserByEmail('free@techinject.dev');
+    assert.ok(user);
+    const session = db.createSession(user);
+    assert.ok(db.verifySessionUser(session.token));
+
+    // Logout: delete session
+    db.deleteSession(session.token);
+    assert.strictEqual(db.verifySessionUser(session.token), null, 'Session must be null after logout');
+  });
+
+  // Test 0d: Unpublished component cannot be publicly accessed
+  test('0d. Unpublished component cannot be publicly accessed', () => {
+    // Unpublish button
+    const btn = db.getComponentBySlug('button', false);
+    assert.ok(btn);
+    db.setComponentStatus(btn.id, 'UNPUBLISHED');
+
+    // Public lookup must now return null
+    const publicBtn = db.getComponentBySlug('button', false);
+    assert.strictEqual(publicBtn, null);
+
+    const publicList = db.listComponents({ includeDrafts: false });
+    assert.strictEqual(publicList.some(c => c.slug === 'button'), false);
+
+    // Restore button to PUBLISHED for other tests
+    db.setComponentStatus(btn.id, 'PUBLISHED');
+  });
+
   // Test 1: Unauthorized admin writes fail
   test('1. Unauthorized admin writes fail', () => {
     const unauthenticatedUser = null;

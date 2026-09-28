@@ -192,4 +192,74 @@ router.post('/:slug/install', (req: AuthenticatedRequest, res) => {
   });
 });
 
+/**
+ * GET /api/components/:slug/ai-prompt
+ * AI Agent prompt endpoint with strict server-side premium validation.
+ */
+router.get('/:slug/ai-prompt', (req: AuthenticatedRequest, res) => {
+  const { slug } = req.params;
+  const comp = db.getComponentBySlug(slug, false);
+
+  if (!comp) {
+    return res.status(404).json({ error: `Component '${slug}' not found or unpublished`, code: 'COMPONENT_NOT_FOUND' });
+  }
+
+  if (comp.accessLevel === 'PREMIUM') {
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required for premium component AI prompt',
+        code: 'SIGN_IN_REQUIRED',
+      });
+    }
+    if (req.user.tier !== 'premium' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Active premium subscription required to generate AI agent prompt',
+        code: 'PREMIUM_REQUIRED',
+      });
+    }
+  }
+
+  const prompt = generateAiAgentPrompt(comp);
+  return res.json({
+    slug: comp.slug,
+    name: comp.name,
+    prompt,
+  });
+});
+
+/**
+ * GET /api/components/:slug/preview
+ * Component preview data endpoint with server-side protection.
+ */
+router.get('/:slug/preview', (req: AuthenticatedRequest, res) => {
+  const { slug } = req.params;
+  const comp = db.getComponentBySlug(slug, false);
+
+  if (!comp) {
+    return res.status(404).json({ error: `Component '${slug}' not found or unpublished`, code: 'COMPONENT_NOT_FOUND' });
+  }
+
+  if (comp.accessLevel === 'PREMIUM') {
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required for live interactive preview',
+        code: 'SIGN_IN_REQUIRED',
+      });
+    }
+    if (req.user.tier !== 'premium' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Active premium subscription required for live interactive preview',
+        code: 'PREMIUM_REQUIRED',
+      });
+    }
+  }
+
+  return res.json({
+    slug: comp.slug,
+    name: comp.name,
+    previewStates: comp.previewStates,
+    propsSchema: comp.propsSchema,
+  });
+});
+
 export default router;

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import {
   ComponentRecord,
   CustomerUser,
@@ -738,7 +739,17 @@ class Database {
     const user = this.getUserByEmail(email);
     if (!user) return null;
     const storedPass = this.data.userCredentials[user.id];
-    if (storedPass === pass) {
+    if (!storedPass) return null;
+
+    // Check if storedPass is bcrypt hash or plaintext
+    if (storedPass.startsWith('$2a$') || storedPass.startsWith('$2b$')) {
+      if (bcrypt.compareSync(pass, storedPass)) {
+        return user;
+      }
+    } else if (storedPass === pass) {
+      // Migrate plaintext password to bcrypt hash automatically
+      this.data.userCredentials[user.id] = bcrypt.hashSync(pass, 10);
+      this.save();
       return user;
     }
     return null;

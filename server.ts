@@ -11,6 +11,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startServer() {
+  // Initialize MongoDB Atlas connection if MONGODB_URI is provided
+  const { connectMongo } = await import('./server/mongodb');
+  await connectMongo();
+
   const app = express();
   // Read port from CLI flags (--port=XXXX, --port XXXX), positional numeric arg (e.g. 3001), or PORT env
   const positionalPort = process.argv.slice(2).find(arg => /^\d{4,5}$/.test(arg));

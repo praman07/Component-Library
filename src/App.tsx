@@ -16,7 +16,7 @@ import { AdminCustomers } from './apps/admin/AdminCustomers';
 import { ComponentSummary } from './packages/types';
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname || '/');
   const [components, setComponents] = useState<ComponentSummary[]>([]);
   const [loadingComponents, setLoadingComponents] = useState(true);
@@ -106,54 +106,110 @@ function AppContent() {
       return <AccountPage onNavigate={navigate} />;
     }
 
-    // 7. Admin Routes
-    if (currentPath === '/admin') {
-      return (
-        <AdminDashboard
-          onNavigate={navigate}
-          onEditComponent={(id) => navigate(`/admin/components/${id}`)}
-        />
-      );
-    }
+    // 7. Admin Routes (Protected: Admin Only)
+    if (currentPath.startsWith('/admin')) {
+      if (loadingComponents || authLoading) {
+        return <LoadingState message="Verifying administrative credentials..." />;
+      }
 
-    if (currentPath === '/admin/components') {
-      return (
-        <AdminComponentsList
-          onNavigate={navigate}
-          onEditComponent={(id) => navigate(`/admin/components/${id}`)}
-          onViewComponentPublic={(slug) => navigate(`/components/${slug}`)}
-        />
-      );
-    }
+      if (!user) {
+        return (
+          <div className="py-16 text-center max-w-md mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#161616] border border-[#2D2D2D] mx-auto flex items-center justify-center text-[#FFFFFF]">
+              <span className="font-mono text-sm">401</span>
+            </div>
+            <h2 className="text-lg font-bold text-[#FFFFFF]">Authentication Required</h2>
+            <p className="text-xs text-[#8A8A8A] leading-relaxed">
+              The Admin Panel is strictly protected. Please sign in with an administrator account (e.g. <code className="text-[#F5F5F5]">admin@techinject.dev</code>) to access the publisher dashboard.
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={() => navigate('/login')}
+                className="px-4 py-2 bg-[#FFFFFF] text-[#000000] rounded text-xs font-semibold hover:bg-[#E5E5E5] cursor-pointer"
+              >
+                Sign In as Admin
+              </button>
+            </div>
+          </div>
+        );
+      }
 
-    if (currentPath === '/admin/components/new') {
-      return (
-        <AdminComponentEditor
-          onBack={() => navigate('/admin/components')}
-          onSaved={() => {
-            loadCatalogue();
-            navigate('/admin/components');
-          }}
-        />
-      );
-    }
+      if (user.role !== 'admin') {
+        return (
+          <div className="py-16 text-center max-w-md mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#161616] border border-[#2D2D2D] mx-auto flex items-center justify-center text-[#FFFFFF]">
+              <span className="font-mono text-sm">403</span>
+            </div>
+            <h2 className="text-lg font-bold text-[#FFFFFF]">Admin Privileges Required</h2>
+            <p className="text-xs text-[#8A8A8A] leading-relaxed">
+              You are signed in as <strong className="text-[#FFFFFF]">{user.email}</strong> with customer tier (<span className="uppercase font-mono">{user.tier}</span>). Administrator privileges are required to access this dashboard.
+            </p>
+            <div className="pt-2 flex justify-center gap-3">
+              <button
+                onClick={() => navigate('/account')}
+                className="px-4 py-2 bg-[#FFFFFF] text-[#000000] rounded text-xs font-semibold hover:bg-[#E5E5E5] cursor-pointer"
+              >
+                My Account
+              </button>
+              <button
+                onClick={() => navigate('/components')}
+                className="px-4 py-2 bg-[#161616] text-[#FFFFFF] border border-[#262626] rounded text-xs font-semibold hover:bg-[#222222] cursor-pointer"
+              >
+                Browse Components
+              </button>
+            </div>
+          </div>
+        );
+      }
 
-    if (currentPath.startsWith('/admin/components/')) {
-      const compId = currentPath.replace('/admin/components/', '');
-      return (
-        <AdminComponentEditor
-          componentId={compId}
-          onBack={() => navigate('/admin/components')}
-          onSaved={() => {
-            loadCatalogue();
-            navigate('/admin/components');
-          }}
-        />
-      );
-    }
+      if (currentPath === '/admin') {
+        return (
+          <AdminDashboard
+            onNavigate={navigate}
+            onEditComponent={(id) => navigate(`/admin/components/${id}`)}
+          />
+        );
+      }
 
-    if (currentPath === '/admin/customers') {
-      return <AdminCustomers onNavigate={navigate} />;
+      if (currentPath === '/admin/components') {
+        return (
+          <AdminComponentsList
+            onNavigate={navigate}
+            onEditComponent={(id) => navigate(`/admin/components/${id}`)}
+            onViewComponentPublic={(slug) => navigate(`/components/${slug}`)}
+          />
+        );
+      }
+
+      if (currentPath === '/admin/components/new') {
+        return (
+          <AdminComponentEditor
+            onBack={() => navigate('/admin/components')}
+            onSaved={() => {
+              loadCatalogue();
+              navigate('/admin/components');
+            }}
+          />
+        );
+      }
+
+      if (currentPath.startsWith('/admin/components/')) {
+        const compId = currentPath.replace('/admin/components/', '');
+        return (
+          <AdminComponentEditor
+            componentId={compId}
+            onBack={() => navigate('/admin/components')}
+            onSaved={() => {
+              loadCatalogue();
+              navigate('/admin/components');
+            }}
+          />
+        );
+      }
+
+      if (currentPath === '/admin/customers') {
+        return <AdminCustomers onNavigate={navigate} />;
+      }
     }
 
     // Fallback: 404

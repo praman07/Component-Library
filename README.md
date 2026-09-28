@@ -80,26 +80,39 @@ Tech Inject Design Library is a component distribution platform and documentatio
 Defined in `.env.example`:
 
 ```bash
-# Application Port (defaults to 3000 in AI Studio preview)
+# Application Port (defaults to 3000)
 PORT=3000
 
-# Environment Mode
+# Environment Mode (development or production)
 NODE_ENV=production
 
-# Public Application URL (injected by runtime environment)
-APP_URL="https://ais-dev-umswstye3b3vlmabdlefxs-839744006411.asia-east1.run.app"
+# MongoDB Atlas Connection URI (optional: falls back to persistent file store if omitted)
+MONGODB_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/tech-inject?retryWrites=true&w=majority"
+
+# Session Security Secret
+SESSION_SECRET="your-secure-random-session-secret"
+
+# Public Application URL
+APP_URL="http://localhost:3000"
+
+# CLI API Endpoint
+TECH_INJECT_API_URL="http://localhost:3000"
 ```
 
 No secrets or admin tokens are exposed in client-side JavaScript.
 
 ---
 
-## 4. Database & Storage Setup
+## 4. Database & Storage Architecture
 
-- **Database Engine**: Atomic file-backed JSON relational store located at `data/database.json`.
-- **Durability**: All modifications use atomic write-to-temp and rename operations to prevent partial write corruption.
-- **Bundle Storage**: Raw bundle source files are stored in `data/bundles/` and serialized within the component registry.
-- **Cold Boot & Restart Resilience**: The engine automatically creates data directories and seeds default accounts and components on first run.
+- **Primary Persistence (MongoDB Atlas)**:
+  - Models for `User`, `Session`, and `Component` (`server/models/index.ts`).
+  - Passwords hashed using `bcrypt` (10 rounds).
+  - Automatically seeds default administrator and demo customer accounts on cold start.
+- **Fallback Persistence**: Transparent persistent JSON store (`data/database.json`) when `MONGODB_URI` is not configured.
+- **Storage Abstraction (`server/storage.ts`)**:
+  - Implements `upload()`, `download()`, `delete()`, and `exists()`.
+  - Safely abstracts component source file storage for ephemeral serverless and containerized runtimes.
 
 ---
 
