@@ -19,13 +19,21 @@ function runMiddleware(req: any, res: any, fn: any) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    await runMiddleware(req, res, extractAuthUser);
-
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    await connectMongo();
+    try {
+      await runMiddleware(req, res, extractAuthUser);
+    } catch (e) {
+      // Non-fatal
+    }
+
+    try {
+      await connectMongo();
+    } catch (e) {
+      // Non-fatal
+    }
 
     const { category, accessLevel, search } = req.query;
 

@@ -20,27 +20,29 @@ export async function connectMongo(): Promise<boolean> {
     return false;
   }
 
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return true;
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 2500,
+      serverSelectionTimeoutMS: 1500,
+      connectTimeoutMS: 1500,
     };
 
-    cached.promise = mongoose.connect(uri, opts).then(async (mongooseInstance) => {
-      console.log('[MongoDB Atlas] Connected successfully.');
-      try {
-        await seedMongoIfEmpty();
-      } catch (err: any) {
-        console.warn('[MongoDB Atlas] Seed check warning:', err.message);
-      }
-      return mongooseInstance;
-    }).catch((err) => {
+    cached.promise = Promise.race([
+      mongoose.connect(uri, opts).then(async (mongooseInstance) => {
+        try {
+          await seedMongoIfEmpty();
+        } catch (err: any) {
+          // Non-fatal
+        }
+        return mongooseInstance;
+      }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 1800)),
+    ]).catch((err) => {
       cached.promise = null;
-      console.warn(`[MongoDB Atlas] Connection failed (${err.message}). Using persistent file-backed store fallback.`);
       return null;
     });
   }

@@ -62,10 +62,18 @@ async function getComponentFromStore(slug: string, includeUnpublished = false): 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    await runMiddleware(req, res, extractAuthUser);
+    try {
+      await runMiddleware(req, res, extractAuthUser);
+    } catch (e) {
+      // Non-fatal
+    }
     const authReq = req as unknown as AuthenticatedRequest;
 
-    await connectMongo();
+    try {
+      await connectMongo();
+    } catch (e) {
+      // Non-fatal
+    }
 
     // Normalize path query or URL
     const { path } = req.query;

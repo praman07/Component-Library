@@ -20,11 +20,6 @@ function runMiddleware(req: any, res: any, fn: any) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    await runMiddleware(req, res, extractAuthUser);
-    const authReq = req as unknown as AuthenticatedRequest;
-
-    await connectMongo();
-
     const { path } = req.query;
     const action = Array.isArray(path) ? path[0] : path;
 
@@ -36,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       // Check hardcoded credentials first for instantaneous zero-latency sign-in
-      const normEmail = email.toLowerCase().trim();
+      const normEmail = (email || '').toLowerCase().trim();
       const expectedPass = HARDCODED_CREDENTIALS[normEmail];
       if (expectedPass && expectedPass === password) {
         const foundUser = HARDCODED_USERS.find((u) => u.email.toLowerCase() === normEmail);
@@ -114,6 +109,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           createdAt: user.createdAt,
         },
       });
+    }
+
+    try {
+      await runMiddleware(req, res, extractAuthUser);
+    } catch (e) {
+      // Non-fatal
+    }
+    const authReq = req as unknown as AuthenticatedRequest;
+
+    try {
+      await connectMongo();
+    } catch (e) {
+      // Non-fatal
     }
 
     if (action === 'logout') {
