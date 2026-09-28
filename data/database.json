@@ -1,0 +1,705 @@
+{
+  "users": [
+    {
+      "id": "usr_admin_01",
+      "email": "admin@techinject.dev",
+      "role": "admin",
+      "tier": "premium",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "usr_free_02",
+      "email": "free@techinject.dev",
+      "role": "customer",
+      "tier": "free",
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    },
+    {
+      "id": "usr_premium_03",
+      "email": "pro@techinject.dev",
+      "role": "customer",
+      "tier": "premium",
+      "createdAt": "2026-01-03T00:00:00.000Z",
+      "updatedAt": "2026-09-28T13:06:11.106Z"
+    }
+  ],
+  "userCredentials": {
+    "usr_admin_01": "admin123",
+    "usr_free_02": "free123",
+    "usr_premium_03": "premium123"
+  },
+  "sessions": [
+    {
+      "token": "ti_sess_e4267fb953995d2e2d24e45904fc337377e68d865b90a147",
+      "userId": "usr_premium_03",
+      "email": "pro@techinject.dev",
+      "role": "customer",
+      "tier": "premium",
+      "expiresAt": "2026-10-05T13:06:11.104Z"
+    },
+    {
+      "token": "ti_sess_b538779e5e7ad2a413082c1803e3315acc1dafa020425b85",
+      "userId": "usr_admin_01",
+      "email": "admin@techinject.dev",
+      "role": "admin",
+      "tier": "premium",
+      "expiresAt": "2026-10-05T13:23:53.782Z"
+    }
+  ],
+  "components": [
+    {
+      "id": "cmp_button_01",
+      "name": "Button",
+      "slug": "button",
+      "description": "High-contrast tactile interactive trigger supporting 5 variants, 3 sizes, and loading states in strict monochrome.",
+      "category": "primitives",
+      "version": "1.4.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {
+        "lucide-react": "^0.546.0"
+      },
+      "propsSchema": [
+        {
+          "name": "variant",
+          "type": "'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'",
+          "required": false,
+          "default": "'primary'",
+          "description": "Visual style of the button"
+        },
+        {
+          "name": "size",
+          "type": "'sm' | 'md' | 'lg' | 'icon'",
+          "required": false,
+          "default": "'md'",
+          "description": "Button height and padding"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Displays spinner and disables pointer events"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Prevents user interaction"
+        }
+      ],
+      "mainFile": "src/components/ui/Button.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Button.tsx",
+          "content": "import React from 'react';\nimport { Loader2 } from 'lucide-react';\n\nexport interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';\n  size?: 'sm' | 'md' | 'lg' | 'icon';\n  loading?: boolean;\n}\n\nexport const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\n  ({ children, className = '', variant = 'primary', size = 'md', loading = false, disabled = false, ...props }, ref) => {\n    const base = 'inline-flex items-center justify-center font-medium rounded-md transition-colors select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FFFFFF] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-xs';\n    const sizes = {\n      sm: 'h-8 px-2.5 gap-1.5 text-xs',\n      md: 'h-9 px-3.5 gap-2 text-xs',\n      lg: 'h-10 px-4 gap-2 text-sm',\n      icon: 'h-9 w-9 p-0 flex items-center justify-center',\n    }[size];\n    const variants = {\n      primary: 'bg-[#FFFFFF] text-[#000000] hover:bg-[#E5E5E5] active:bg-[#CCCCCC]',\n      secondary: 'bg-[#161616] text-[#F5F5F5] border border-[#262626] hover:bg-[#222222]',\n      outline: 'bg-transparent text-[#F5F5F5] border border-[#262626] hover:border-[#444444]',\n      ghost: 'bg-transparent text-[#A3A3A3] hover:text-[#FFFFFF] hover:bg-[#161616]',\n      destructive: 'bg-[#222222] text-[#F5F5F5] border border-[#444444] hover:bg-[#2c2c2c]',\n    }[variant];\n\n    return (\n      <button ref={ref} disabled={disabled || loading} className={`${base} ${sizes} ${variants} ${className}`} {...props}>\n        {loading && <Loader2 className=\"w-3.5 h-3.5 animate-spin shrink-0\" />}\n        {children}\n      </button>\n    );\n  }\n);\nButton.displayName = 'Button';",
+          "description": "Main Button component implementation"
+        }
+      ],
+      "usageDocs": "import { Button } from '@/components/ui/Button';\n\nexport function Example() {\n  return (\n    <div className=\"flex gap-2\">\n      <Button variant=\"primary\">Deploy Service</Button>\n      <Button variant=\"secondary\">Cancel</Button>\n      <Button variant=\"outline\" loading>Synchronizing...</Button>\n    </div>\n  );\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Default Primary",
+          "description": "Standard high-contrast primary button with dark foreground",
+          "props": {
+            "variant": "primary",
+            "label": "Primary Action"
+          }
+        },
+        {
+          "id": "secondary",
+          "name": "Secondary",
+          "description": "Subtle surface background with thin hairline border",
+          "props": {
+            "variant": "secondary",
+            "label": "Secondary Action"
+          }
+        },
+        {
+          "id": "outline",
+          "name": "Outline",
+          "description": "Transparent background with hairline border",
+          "props": {
+            "variant": "outline",
+            "label": "Outline Action"
+          }
+        },
+        {
+          "id": "loading",
+          "name": "Loading",
+          "description": "Animated spinner with disabled interaction",
+          "props": {
+            "variant": "primary",
+            "loading": true,
+            "label": "Processing"
+          }
+        },
+        {
+          "id": "disabled",
+          "name": "Disabled",
+          "description": "Reduced opacity state for blocked actions",
+          "props": {
+            "variant": "primary",
+            "disabled": true,
+            "label": "Action Blocked"
+          }
+        }
+      ],
+      "tags": [
+        "trigger",
+        "action",
+        "form",
+        "primitive"
+      ],
+      "createdAt": "2026-03-01T00:00:00.000Z",
+      "updatedAt": "2026-03-01T00:00:00.000Z",
+      "publishedAt": "2026-03-01T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_input_02",
+      "name": "Input",
+      "slug": "input",
+      "description": "Accessible single-line text input field with prefix/suffix slot support, keyboard focus rings, and error message attachment.",
+      "category": "forms",
+      "version": "1.2.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {},
+      "propsSchema": [
+        {
+          "name": "placeholder",
+          "type": "string",
+          "required": false,
+          "default": "''",
+          "description": "Placeholder helper text"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "required": false,
+          "default": "undefined",
+          "description": "Validation error text"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Disables user entry"
+        }
+      ],
+      "mainFile": "src/components/ui/Input.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Input.tsx",
+          "content": "import React from 'react';\n\nexport interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {\n  error?: string;\n}\n\nexport const Input = React.forwardRef<HTMLInputElement, InputProps>(\n  ({ className = '', error, disabled, ...props }, ref) => {\n    return (\n      <div className=\"w-full\">\n        <input\n          ref={ref}\n          disabled={disabled}\n          className={`w-full h-9 bg-[#111111] text-[#F5F5F5] placeholder-[#525252] text-xs rounded-md border px-3 transition-colors ${\n            error ? 'border-[#737373] focus:border-[#FFFFFF]' : 'border-[#262626] focus:border-[#FFFFFF]'\n          } focus:outline-none focus:ring-1 focus:ring-[#FFFFFF] disabled:opacity-40 ${className}`}\n          {...props}\n        />\n        {error && <p className=\"mt-1 text-[11px] text-[#A3A3A3]\">{error}</p>}\n      </div>\n    );\n  }\n);\nInput.displayName = 'Input';",
+          "description": "Single-line input with error state and focus ring"
+        }
+      ],
+      "usageDocs": "import { Input } from '@/components/ui/Input';\n\nexport function FormDemo() {\n  return (\n    <Input\n      placeholder=\"e.g. org_production_db\"\n      error={undefined}\n    />\n  );\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Standard text input state",
+          "props": {
+            "placeholder": "Enter API Key ID..."
+          }
+        },
+        {
+          "id": "filled",
+          "name": "Filled Value",
+          "description": "Input containing user data",
+          "props": {
+            "defaultValue": "live_sec_token_9410"
+          }
+        },
+        {
+          "id": "error",
+          "name": "Validation Error",
+          "description": "Input with error indicator text",
+          "props": {
+            "defaultValue": "invalid key",
+            "error": "Key identifier must begin with \"sec_\""
+          }
+        },
+        {
+          "id": "disabled",
+          "name": "Disabled State",
+          "description": "Input disabled for edits",
+          "props": {
+            "defaultValue": "read_only_endpoint",
+            "disabled": true
+          }
+        }
+      ],
+      "tags": [
+        "field",
+        "form",
+        "text",
+        "primitive"
+      ],
+      "createdAt": "2026-03-02T00:00:00.000Z",
+      "updatedAt": "2026-03-02T00:00:00.000Z",
+      "publishedAt": "2026-03-02T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_badge_03",
+      "name": "Badge",
+      "slug": "badge",
+      "description": "Compact status and metadata tag using clean unboxed or subtle hairline borders in accordance with zero-pill principles.",
+      "category": "primitives",
+      "version": "1.1.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {},
+      "propsSchema": [
+        {
+          "name": "variant",
+          "type": "'default' | 'outline' | 'subtle' | 'contrast'",
+          "required": false,
+          "default": "'default'",
+          "description": "Styling tone"
+        },
+        {
+          "name": "size",
+          "type": "'sm' | 'md'",
+          "required": false,
+          "default": "'md'",
+          "description": "Padding scale"
+        }
+      ],
+      "mainFile": "src/components/ui/Badge.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Badge.tsx",
+          "content": "import React from 'react';\n\nexport interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {\n  variant?: 'default' | 'outline' | 'subtle' | 'contrast';\n  size?: 'sm' | 'md';\n}\n\nexport const Badge: React.FC<BadgeProps> = ({ children, className = '', variant = 'default', size = 'md', ...props }) => {\n  const base = 'inline-flex items-center font-medium rounded tracking-normal select-none';\n  const sizes = { sm: 'px-1.5 py-0.5 text-[11px] gap-1', md: 'px-2 py-0.5 text-xs gap-1.5' }[size];\n  const variants = {\n    default: 'bg-[#161616] text-[#F5F5F5] border border-[#262626]',\n    outline: 'bg-transparent text-[#A3A3A3] border border-[#262626]',\n    subtle: 'bg-[#0F0F0F] text-[#737373]',\n    contrast: 'bg-[#FFFFFF] text-[#000000]',\n  }[variant];\n  return <span className={`${base} ${sizes} ${variants} ${className}`} {...props}>{children}</span>;\n};",
+          "description": "Subtle badge component"
+        }
+      ],
+      "usageDocs": "import { Badge } from '@/components/ui/Badge';\n\nexport function StatusIndicator() {\n  return <Badge variant=\"contrast\">Verified Release</Badge>;\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Standard dark surface badge with hairline border",
+          "props": {
+            "children": "Production Ready"
+          }
+        },
+        {
+          "id": "contrast",
+          "name": "Contrast",
+          "description": "Solid white badge with dark text for high priority indicators",
+          "props": {
+            "variant": "contrast",
+            "children": "Enterprise"
+          }
+        },
+        {
+          "id": "outline",
+          "name": "Outline",
+          "description": "Transparent background badge",
+          "props": {
+            "variant": "outline",
+            "children": "v2.4.0-stable"
+          }
+        },
+        {
+          "id": "subtle",
+          "name": "Subtle",
+          "description": "Low contrast muted metadata tag",
+          "props": {
+            "variant": "subtle",
+            "children": "Internal Only"
+          }
+        }
+      ],
+      "tags": [
+        "tag",
+        "status",
+        "label",
+        "primitive"
+      ],
+      "createdAt": "2026-03-03T00:00:00.000Z",
+      "updatedAt": "2026-03-03T00:00:00.000Z",
+      "publishedAt": "2026-03-03T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_card_04",
+      "name": "Card",
+      "slug": "card",
+      "description": "Flat single-elevation structural container with hairline borders, structured header, content body, and footer.",
+      "category": "primitives",
+      "version": "1.0.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {},
+      "propsSchema": [
+        {
+          "name": "hoverable",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Applies border lightening on mouse hover"
+        }
+      ],
+      "mainFile": "src/components/ui/Card.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Card.tsx",
+          "content": "import React from 'react';\n\nexport const Card: React.FC<React.HTMLAttributes<HTMLDivElement> & { hoverable?: boolean }> = ({\n  children, className = '', hoverable = false, ...props\n}) => (\n  <div className={`bg-[#111111] border border-[#262626] rounded-md transition-colors ${hoverable ? 'hover:border-[#383838]' : ''} ${className}`} {...props}>\n    {children}\n  </div>\n);",
+          "description": "Single elevation card container"
+        }
+      ],
+      "usageDocs": "import { Card } from '@/components/ui/Card';\n\nexport function ContainerDemo() {\n  return (\n    <Card hoverable className=\"p-4\">\n      <h3>Cluster Health</h3>\n      <p>All nodes responding normally.</p>\n    </Card>\n  );\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Standard container with header, content and action footer",
+          "props": {
+            "hoverable": false
+          }
+        },
+        {
+          "id": "hoverable",
+          "name": "Hoverable",
+          "description": "Container with reactive border highlighting",
+          "props": {
+            "hoverable": true
+          }
+        }
+      ],
+      "tags": [
+        "container",
+        "layout",
+        "surface",
+        "primitive"
+      ],
+      "createdAt": "2026-03-04T00:00:00.000Z",
+      "updatedAt": "2026-03-04T00:00:00.000Z",
+      "publishedAt": "2026-03-04T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_tabs_05",
+      "name": "Tabs",
+      "slug": "tabs",
+      "description": "Accessible segmented and underline tab controls for managing contextual views and filter states.",
+      "category": "navigation",
+      "version": "1.3.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {},
+      "propsSchema": [
+        {
+          "name": "variant",
+          "type": "'line' | 'segmented'",
+          "required": false,
+          "default": "'line'",
+          "description": "Underline tabs or button pill segment"
+        },
+        {
+          "name": "tabs",
+          "type": "TabItem[]",
+          "required": true,
+          "description": "Tab descriptors with labels and count badges"
+        }
+      ],
+      "mainFile": "src/components/ui/Tabs.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Tabs.tsx",
+          "content": "import React from 'react';\n\nexport interface TabItem {\n  id: string;\n  label: string;\n  count?: number;\n}\n\nexport const Tabs: React.FC<{ tabs: TabItem[]; activeId: string; onChange: (id: string) => void; variant?: 'line' | 'segmented' }> = ({\n  tabs, activeId, onChange, variant = 'line'\n}) => {\n  return (\n    <div className={variant === 'segmented' ? 'inline-flex p-1 bg-[#111111] border border-[#262626] rounded-md' : 'flex gap-6 border-b border-[#262626]'}>\n      {tabs.map((tab) => (\n        <button\n          key={tab.id}\n          onClick={() => onChange(tab.id)}\n          className={activeId === tab.id ? 'bg-[#222222] text-[#FFFFFF] px-3 py-1 text-xs rounded' : 'text-[#8A8A8A] px-3 py-1 text-xs'}\n        >\n          {tab.label} {tab.count && <span className=\"ml-1 text-[10px] font-mono\">{tab.count}</span>}\n        </button>\n      ))}\n    </div>\n  );\n};",
+          "description": "Accessible Tabs navigation primitive"
+        }
+      ],
+      "usageDocs": "import { Tabs } from '@/components/ui/Tabs';\n\nexport function Navigation() {\n  const [tab, setTab] = useState('all');\n  return (\n    <Tabs\n      tabs={[{ id: 'all', label: 'All Services' }, { id: 'active', label: 'Active', count: 3 }]}\n      activeId={tab}\n      onChange={setTab}\n    />\n  );\n}",
+      "previewStates": [
+        {
+          "id": "line",
+          "name": "Line Underline",
+          "description": "Subtle bottom hairline underline indicator",
+          "props": {
+            "variant": "line"
+          }
+        },
+        {
+          "id": "segmented",
+          "name": "Segmented Control",
+          "description": "Contained button switch for local state filtering",
+          "props": {
+            "variant": "segmented"
+          }
+        }
+      ],
+      "tags": [
+        "tabs",
+        "navigation",
+        "filter",
+        "switcher"
+      ],
+      "createdAt": "2026-03-05T00:00:00.000Z",
+      "updatedAt": "2026-03-05T00:00:00.000Z",
+      "publishedAt": "2026-03-05T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_datatable_06",
+      "name": "DataTable",
+      "slug": "data-table",
+      "description": "Enterprise data grid with server/client multi-column sorting, tabular numeric figures, pagination, and zero layout shift.",
+      "category": "data-display",
+      "version": "2.1.0",
+      "accessLevel": "PREMIUM",
+      "status": "PUBLISHED",
+      "dependencies": {
+        "lucide-react": "^0.546.0"
+      },
+      "propsSchema": [
+        {
+          "name": "columns",
+          "type": "Column<T>[]",
+          "required": true,
+          "description": "Column schema with sorting, alignment and custom cell renderers"
+        },
+        {
+          "name": "data",
+          "type": "T[]",
+          "required": true,
+          "description": "Row data items array"
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "required": false,
+          "default": "10",
+          "description": "Number of rows rendered per page"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Shows skeleton row placeholders"
+        }
+      ],
+      "mainFile": "src/components/ui/DataTable.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/DataTable.tsx",
+          "content": "import React, { useState } from 'react';\nimport { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';\n\nexport interface Column<T> {\n  key: string;\n  header: string;\n  render?: (row: T, index: number) => React.ReactNode;\n  align?: 'left' | 'center' | 'right';\n  sortable?: boolean;\n}\n\nexport function DataTable<T extends Record<string, any>>({ columns, data, pageSize = 10 }: { columns: Column<T>[]; data: T[]; pageSize?: number }) {\n  const [sortKey, setSortKey] = useState<string | null>(null);\n  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');\n\n  const sortedData = React.useMemo(() => {\n    if (!sortKey) return data;\n    return [...data].sort((a, b) => {\n      const valA = a[sortKey];\n      const valB = b[sortKey];\n      return sortDir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);\n    });\n  }, [data, sortKey, sortDir]);\n\n  return (\n    <div className=\"w-full border border-[#262626] rounded-md bg-[#111111] overflow-hidden\">\n      <table className=\"w-full text-xs\">\n        <thead>\n          <tr className=\"border-b border-[#262626] bg-[#0E0E0E]\">\n            {columns.map((col) => (\n              <th\n                key={col.key}\n                onClick={() => {\n                  if (col.sortable) {\n                    setSortKey(col.key);\n                    setSortDir(sortKey === col.key && sortDir === 'asc' ? 'desc' : 'asc');\n                  }\n                }}\n                className=\"py-2.5 px-3.5 text-left text-[11px] font-medium text-[#A3A3A3] uppercase tracking-wider cursor-pointer\"\n              >\n                {col.header}\n              </th>\n            ))}\n          </tr>\n        </thead>\n        <tbody className=\"divide-y divide-[#1C1C1C]\">\n          {sortedData.map((row, i) => (\n            <tr key={i} className=\"hover:bg-[#161616]\">\n              {columns.map((col) => (\n                <td key={col.key} className=\"py-3 px-3.5 text-[#F5F5F5]\">\n                  {col.render ? col.render(row, i) : row[col.key]}\n                </td>\n              ))}\n            </tr>\n          ))}\n        </tbody>\n      </table>\n    </div>\n  );\n}",
+          "description": "Complete high-performance DataTable component"
+        }
+      ],
+      "usageDocs": "import { DataTable } from '@/components/ui/DataTable';\n\nexport function TransactionsGrid() {\n  const columns = [\n    { key: 'id', header: 'Tx Hash' },\n    { key: 'amount', header: 'Volume', align: 'right', sortable: true },\n    { key: 'status', header: 'Settlement' },\n  ];\n  return <DataTable columns={columns} data={transactions} />;\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Interactive Table",
+          "description": "Fully sortable table with tabular figures and column alignment",
+          "props": {}
+        }
+      ],
+      "tags": [
+        "table",
+        "grid",
+        "data",
+        "enterprise",
+        "premium"
+      ],
+      "createdAt": "2026-03-06T00:00:00.000Z",
+      "updatedAt": "2026-03-06T00:00:00.000Z",
+      "publishedAt": "2026-03-06T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_dialog_07",
+      "name": "Dialog",
+      "slug": "dialog",
+      "description": "Accessible modal dialog primitive featuring keyboard focus trapping, backdrop escape listener, and smooth enter transitions.",
+      "category": "overlays",
+      "version": "1.4.0",
+      "accessLevel": "PREMIUM",
+      "status": "PUBLISHED",
+      "dependencies": {
+        "lucide-react": "^0.546.0"
+      },
+      "propsSchema": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": true,
+          "description": "Controls visibility of the modal dialog"
+        },
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "required": true,
+          "description": "Callback invoked when backdrop or escape is triggered"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Accessible modal header title"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Subheader explanation text"
+        }
+      ],
+      "mainFile": "src/components/ui/Dialog.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/Dialog.tsx",
+          "content": "import React, { useEffect } from 'react';\nimport { X } from 'lucide-react';\n\nexport interface DialogProps {\n  open: boolean;\n  onClose: () => void;\n  title: string;\n  description?: string;\n  children: React.ReactNode;\n  footer?: React.ReactNode;\n}\n\nexport const Dialog: React.FC<DialogProps> = ({ open, onClose, title, description, children, footer }) => {\n  useEffect(() => {\n    const handleKey = (e: KeyboardEvent) => {\n      if (e.key === 'Escape' && open) onClose();\n    };\n    if (open) window.addEventListener('keydown', handleKey);\n    return () => window.removeEventListener('keydown', handleKey);\n  }, [open, onClose]);\n\n  if (!open) return null;\n\n  return (\n    <div className=\"fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/80\">\n      <div className=\"w-full max-w-md bg-[#111111] border border-[#262626] rounded-md shadow-2xl p-4 text-[#F5F5F5]\">\n        <div className=\"flex items-center justify-between pb-3 border-b border-[#1F1F1F]\">\n          <h2 className=\"text-sm font-semibold text-[#FFFFFF]\">{title}</h2>\n          <button onClick={onClose} className=\"text-[#737373] hover:text-[#FFFFFF]\"><X className=\"w-4 h-4\" /></button>\n        </div>\n        <div className=\"py-4 text-xs\">{children}</div>\n        {footer && <div className=\"pt-3 border-t border-[#1F1F1F] flex justify-end gap-2\">{footer}</div>}\n      </div>\n    </div>\n  );\n};",
+          "description": "Complete modal dialog overlay primitive"
+        }
+      ],
+      "usageDocs": "import { Dialog } from '@/components/ui/Dialog';\n\nexport function ConfirmModal() {\n  const [open, setOpen] = useState(false);\n  return (\n    <Dialog open={open} onClose={() => setOpen(false)} title=\"Destroy Database Instance\">\n      <p>This action is irreversible.</p>\n    </Dialog>\n  );\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Open Dialog Demo",
+          "description": "Modal with backdrop, title, and action footer",
+          "props": {
+            "title": "Revoke Security Credential"
+          }
+        }
+      ],
+      "tags": [
+        "modal",
+        "dialog",
+        "overlay",
+        "accessible",
+        "premium"
+      ],
+      "createdAt": "2026-03-07T00:00:00.000Z",
+      "updatedAt": "2026-03-07T00:00:00.000Z",
+      "publishedAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_dropdown_08",
+      "name": "ActionDropdown",
+      "slug": "action-dropdown",
+      "description": "Compact contextual action menu with keyboard arrows, divider separation, hotkey shortcuts, and destructive styling.",
+      "category": "navigation",
+      "version": "1.2.0",
+      "accessLevel": "PREMIUM",
+      "status": "PUBLISHED",
+      "dependencies": {
+        "lucide-react": "^0.546.0"
+      },
+      "propsSchema": [
+        {
+          "name": "items",
+          "type": "DropdownItem[]",
+          "required": true,
+          "description": "List of menu actions with shortcuts and handlers"
+        },
+        {
+          "name": "trigger",
+          "type": "React.ReactNode",
+          "required": true,
+          "description": "Button or element that toggles the popover"
+        }
+      ],
+      "mainFile": "src/components/ui/ActionDropdown.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/ActionDropdown.tsx",
+          "content": "import React, { useState, useRef, useEffect } from 'react';\n\nexport const ActionDropdown: React.FC<{ trigger: React.ReactNode; items: any[] }> = ({ trigger, items }) => {\n  const [open, setOpen] = useState(false);\n  const ref = useRef<HTMLDivElement>(null);\n\n  useEffect(() => {\n    const handleOutside = (e: MouseEvent) => {\n      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);\n    };\n    if (open) document.addEventListener('mousedown', handleOutside);\n    return () => document.removeEventListener('mousedown', handleOutside);\n  }, [open]);\n\n  return (\n    <div ref={ref} className=\"relative inline-block\">\n      <div onClick={() => setOpen(!open)}>{trigger}</div>\n      {open && (\n        <div className=\"absolute right-0 mt-1 w-48 bg-[#111111] border border-[#262626] rounded-md shadow-xl py-1 z-50\">\n          {items.map((item, idx) => (\n            <button\n              key={idx}\n              onClick={() => { item.onClick?.(); setOpen(false); }}\n              className=\"w-full px-3 py-1.5 text-xs text-left text-[#D4D4D4] hover:bg-[#1A1A1A] hover:text-[#FFFFFF] flex justify-between\"\n            >\n              <span>{item.label}</span>\n              {item.shortcut && <span className=\"font-mono text-[10px] text-[#525252]\">{item.shortcut}</span>}\n            </button>\n          ))}\n        </div>\n      )}\n    </div>\n  );\n};",
+          "description": "Complete action dropdown menu implementation"
+        }
+      ],
+      "usageDocs": "import { ActionDropdown } from '@/components/ui/ActionDropdown';\n\nexport function RowActions() {\n  return (\n    <ActionDropdown\n      trigger={<button>Options</button>}\n      items={[{ label: 'Export JSON', shortcut: '⌘E' }]}\n    />\n  );\n}",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Trigger Menu",
+          "description": "Contextual options menu with shortcuts and destructive action",
+          "props": {}
+        }
+      ],
+      "tags": [
+        "menu",
+        "dropdown",
+        "actions",
+        "premium"
+      ],
+      "createdAt": "2026-03-08T00:00:00.000Z",
+      "updatedAt": "2026-03-08T00:00:00.000Z",
+      "publishedAt": "2026-03-08T00:00:00.000Z"
+    },
+    {
+      "id": "cmp_draft_09",
+      "name": "CommandPalette",
+      "slug": "command-palette",
+      "description": "Internal draft component for global fuzzy keyboard command execution.",
+      "category": "navigation",
+      "version": "0.1.0-draft",
+      "accessLevel": "PREMIUM",
+      "status": "DRAFT",
+      "dependencies": {},
+      "propsSchema": [],
+      "mainFile": "src/components/ui/CommandPalette.tsx",
+      "files": [
+        {
+          "path": "src/components/ui/CommandPalette.tsx",
+          "content": "export const CommandPalette = () => <div>Draft in progress</div>;",
+          "description": "Draft implementation"
+        }
+      ],
+      "usageDocs": "Draft usage docs",
+      "previewStates": [
+        {
+          "id": "default",
+          "name": "Draft State",
+          "description": "Internal draft",
+          "props": {}
+        }
+      ],
+      "tags": [
+        "internal",
+        "draft",
+        "wip"
+      ],
+      "createdAt": "2026-03-09T00:00:00.000Z",
+      "updatedAt": "2026-03-09T00:00:00.000Z",
+      "publishedAt": null
+    },
+    {
+      "name": "Notification Banner",
+      "slug": "notification-banner",
+      "description": "Tactile notification banner with priority indicators.",
+      "category": "feedback",
+      "version": "1.0.0",
+      "accessLevel": "FREE",
+      "status": "PUBLISHED",
+      "dependencies": {},
+      "propsSchema": [],
+      "files": [
+        {
+          "path": "src/components/ui/Banner.tsx",
+          "content": "export const Banner = () => <div />;"
+        }
+      ],
+      "mainFile": "src/components/ui/Banner.tsx",
+      "usageDocs": "<Banner />",
+      "previewStates": [],
+      "tags": [
+        "banner",
+        "feedback"
+      ],
+      "id": "cmp_dfaec96eed4f",
+      "createdAt": "2026-09-28T13:06:11.101Z",
+      "updatedAt": "2026-09-28T13:06:11.103Z",
+      "publishedAt": "2026-09-28T13:06:11.103Z"
+    }
+  ]
+}

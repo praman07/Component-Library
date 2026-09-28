@@ -1,0 +1,6 @@
+{
+  "name": "Tech Inject Design Library",
+  "description": "Enterprise-grade React and TypeScript component library with developer catalogue, admin publishing workflow, and verified component registry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

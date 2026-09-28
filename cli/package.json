@@ -1,0 +1,26 @@
+{
+  "name": "tech-inject",
+  "version": "1.0.0",
+  "description": "Component installer CLI for Tech Inject Design Library",
+  "bin": {
+    "tech-inject": "./tech-inject.cjs"
+  },
+  "main": "./tech-inject.cjs",
+  "files": [
+    "tech-inject.cjs",
+    "installerCore.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "tech-inject",
+    "components",
+    "cli",
+    "react",
+    "design-system"
+  ],
+  "author": "Tech Inject Design Library",
+  "license": "Apache-2.0"
+}
