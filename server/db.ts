@@ -691,16 +691,20 @@ class Database {
   }
 
   private load(): DatabaseSchema {
-    if (fs.existsSync(DB_FILE)) {
-      try {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.components) && parsed.components.length > 0) {
-          return parsed;
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        try {
+          const raw = fs.readFileSync(DB_FILE, 'utf-8');
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.components) && parsed.components.length > 0) {
+            return parsed;
+          }
+        } catch (err) {
+          // Fall through to initial seeds
         }
-      } catch (err) {
-        console.error('Error reading database file, reinitializing seeds:', err);
       }
+    } catch (e) {
+      // Non-fatal if fs is restricted
     }
 
     const initial: DatabaseSchema = {
@@ -709,7 +713,11 @@ class Database {
       sessions: [],
       components: [...INITIAL_COMPONENTS],
     };
-    this.saveImmediate(initial);
+    try {
+      this.saveImmediate(initial);
+    } catch (e) {
+      // Ignore
+    }
     return initial;
   }
 

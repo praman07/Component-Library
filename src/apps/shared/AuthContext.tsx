@@ -43,10 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setToken(null);
         }
       } else if (activeToken && activeToken.startsWith('ti_sess_client_')) {
-        // Recover user from token id
-        const parts = activeToken.split('_');
-        const userId = parts.slice(3, -1).join('_');
-        const found = HARDCODED_USERS.find((u) => u.id === userId);
+        const found = HARDCODED_USERS.find((u) => activeToken.includes(u.id));
         if (found) {
           setUser(found);
         }

@@ -32,9 +32,7 @@ export function extractAuthUser(req: AuthenticatedRequest, res: Response, next: 
   if (token) {
     let user = db.verifySessionUser(token);
     if (!user && token.startsWith('ti_sess_client_')) {
-      const parts = token.split('_');
-      const userId = parts.slice(3, -1).join('_');
-      user = HARDCODED_USERS.find((u) => u.id === userId) || null;
+      user = HARDCODED_USERS.find((u) => token.includes(u.id)) || null;
     }
 
     if (user) {

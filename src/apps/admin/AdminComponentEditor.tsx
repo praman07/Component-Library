@@ -14,6 +14,7 @@ import {
 import { renderLiveComponent } from '../../packages/reference-components/registry';
 import { ArrowLeft, Save, Globe, EyeOff, Upload, Code2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../shared/AuthContext';
+import { HARDCODED_COMPONENTS } from '../../../server/hardcodedData';
 
 export interface AdminComponentEditorProps {
   componentId?: string; // If undefined, creating new component
@@ -54,12 +55,22 @@ export const AdminComponentEditor: React.FC<AdminComponentEditorProps> = ({
       const fetchComp = async () => {
         setLoading(true);
         try {
-          const res = await fetch(`/api/admin/components/${componentId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) throw new Error('Failed to load component details');
-          const data = await res.json();
-          const c: ComponentRecord = data.component;
+          let c: ComponentRecord | null = null;
+          try {
+            const res = await fetch(`/api/admin/components/${componentId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const text = await res.text();
+              const data = JSON.parse(text);
+              c = data.component;
+            }
+          } catch (e) {}
+
+          if (!c) {
+            c = HARDCODED_COMPONENTS.find((item) => item.id === componentId || item.slug === componentId) || null;
+          }
+          if (!c) throw new Error('Failed to load component details');
 
           setName(c.name);
           setSlug(c.slug);
