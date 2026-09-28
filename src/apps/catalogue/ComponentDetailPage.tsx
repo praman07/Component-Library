@@ -16,6 +16,7 @@ import { renderLiveComponent } from '../../packages/reference-components/registr
 import { Terminal, Copy, Cpu, ArrowLeft, Layers, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../shared/AuthContext';
 import { HARDCODED_COMPONENTS } from '../../../server/hardcodedData';
+import { generateAiAgentPrompt } from '../../../server/generator';
 
 export interface ComponentDetailPageProps {
   slug: string;
@@ -51,12 +52,59 @@ export const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({
         console.warn('Non-JSON response from /api/components/' + slug, text);
       }
 
+      const toDetail = (c: any): ComponentDetailResponse => {
+        const isPrem = c.accessLevel === 'PREMIUM';
+        const hasAccess = !isPrem || (user && (user.role === 'admin' || user.tier === 'premium'));
+        if (!hasAccess) {
+          return {
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            category: c.category,
+            version: c.version,
+            accessLevel: c.accessLevel,
+            status: c.status,
+            tags: c.tags || [],
+            dependencies: c.dependencies || {},
+            propsSchema: c.propsSchema || [],
+            isLocked: true,
+            lockReason: !user ? 'SIGN_IN_REQUIRED' : 'PREMIUM_REQUIRED',
+            updatedAt: c.updatedAt || new Date().toISOString(),
+            publishedAt: c.publishedAt,
+          };
+        }
+        return {
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          description: c.description,
+          category: c.category,
+          version: c.version,
+          accessLevel: c.accessLevel,
+          status: c.status,
+          tags: c.tags || [],
+          dependencies: c.dependencies || {},
+          devDependencies: c.devDependencies || {},
+          propsSchema: c.propsSchema || [],
+          files: c.files || [],
+          mainFile: c.mainFile || '',
+          usageDocs: c.usageDocs || '',
+          previewStates: c.previewStates || [],
+          isLocked: false,
+          installCommand: `npx tech-inject add ${c.slug}`,
+          aiAgentPrompt: generateAiAgentPrompt(c),
+          updatedAt: c.updatedAt || new Date().toISOString(),
+          publishedAt: c.publishedAt,
+        };
+      };
+
       if (res.ok && data?.component) {
         setComponent(data.component);
       } else {
         const fallback = HARDCODED_COMPONENTS.find((c) => c.slug === slug);
         if (fallback) {
-          setComponent(fallback as any);
+          setComponent(toDetail(fallback));
         } else {
           throw new Error(data?.error || 'Failed to load component');
         }
@@ -64,7 +112,32 @@ export const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({
     } catch (err: any) {
       const fallback = HARDCODED_COMPONENTS.find((c) => c.slug === slug);
       if (fallback) {
-        setComponent(fallback as any);
+        const isPrem = fallback.accessLevel === 'PREMIUM';
+        const hasAccess = !isPrem || (user && (user.role === 'admin' || user.tier === 'premium'));
+        setComponent({
+          id: fallback.id,
+          name: fallback.name,
+          slug: fallback.slug,
+          description: fallback.description,
+          category: fallback.category,
+          version: fallback.version,
+          accessLevel: fallback.accessLevel,
+          status: fallback.status,
+          tags: fallback.tags || [],
+          dependencies: fallback.dependencies || {},
+          devDependencies: fallback.devDependencies || {},
+          propsSchema: fallback.propsSchema || [],
+          files: fallback.files || [],
+          mainFile: fallback.mainFile || '',
+          usageDocs: fallback.usageDocs || '',
+          previewStates: fallback.previewStates || [],
+          isLocked: !hasAccess,
+          lockReason: !user ? 'SIGN_IN_REQUIRED' : 'PREMIUM_REQUIRED',
+          installCommand: `npx tech-inject add ${fallback.slug}`,
+          aiAgentPrompt: generateAiAgentPrompt(fallback),
+          updatedAt: fallback.updatedAt || new Date().toISOString(),
+          publishedAt: fallback.publishedAt,
+        } as any);
       } else {
         setError(err.message || 'Component not found');
       }
@@ -346,7 +419,7 @@ export const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({
               </div>
 
               <CodeBlock
-                code={component.aiAgentPrompt}
+                code={component.aiAgentPrompt || generateAiAgentPrompt(component as any)}
                 language="markdown"
                 filename="agent-prompt.md"
                 maxHeight="max-h-[600px]"

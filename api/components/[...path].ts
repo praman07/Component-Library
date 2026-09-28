@@ -208,6 +208,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           updatedAt: comp.updatedAt,
           publishedAt: comp.publishedAt,
           isLocked,
+          lockReason: isLocked ? (!authReq.user ? 'SIGN_IN_REQUIRED' : 'PREMIUM_REQUIRED') : undefined,
+          installCommand: `npx tech-inject add ${comp.slug}`,
+          aiAgentPrompt: generateAiAgentPrompt(comp),
         },
       });
     }

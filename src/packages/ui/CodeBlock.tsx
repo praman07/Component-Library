@@ -11,14 +11,15 @@ export interface CodeBlockProps {
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({
-  code,
+  code = '',
   language = 'typescript',
   filename,
   showLineNumbers = false,
   className = '',
   maxHeight = 'max-h-[500px]',
 }) => {
-  const lines = code.trim().split('\n');
+  const safeCode = typeof code === 'string' ? code : (code ? String(code) : '');
+  const lines = safeCode.trim().split('\n');
 
   return (
     <div className={`bg-[#0A0A0A] border border-[#222222] rounded-md overflow-hidden flex flex-col ${className}`}>
